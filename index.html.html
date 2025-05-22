@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>학원 권리금 시세 계산기</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; background: #f9f9f9; }
+    .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; max-width: 600px; }
+    label, select, input { display: block; margin: 10px 0; }
+    button {
+      font-size: 1.3em;
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .checkbox-line {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .result { margin-top: 20px; font-weight: bold; }
+    .notice { font-size: 0.9em; color: #555; margin-top: 20px; font-weight: normal; }
+  </style>
+</head>
+<body style="display: flex; flex-direction: column; align-items: center;">
+  <div class="box" style="margin: 0 auto;">
+    <h2>🎹 우리 학원의 권리금 시세는?</h2>
+
+    <label>지역:
+      <select id="region">
+        <option value="">시/도(전체)</option>
+        <option value="서울">서울</option>
+        <option value="경기">경기</option>
+        <option value="부산">부산</option>
+        <option value="대구">대구</option>
+        <option value="인천">인천</option>
+        <option value="광주">광주</option>
+        <option value="대전">대전</option>
+        <option value="울산">울산</option>
+        <option value="강원">강원</option>
+        <option value="충남">충남</option>
+        <option value="충북">충북</option>
+        <option value="전남">전남</option>
+        <option value="전북">전북</option>
+        <option value="경남">경남</option>
+        <option value="경북">경북</option>
+        <option value="제주">제주</option>
+        <option value="세종">세종</option>
+      </select>
+    </label>
+
+    <label>분류:
+      <select id="type">
+        <option value="피아노-관인">피아노-관인</option>
+        <option value="피아노-교습소">피아노-교습소</option>
+      </select>
+    </label>
+    <label>건물 형태:
+      <select id="building">
+        <option value="아파트상가">아파트상가</option>
+        <option value="프라자상가">프라자상가</option>
+        <option value="주택상가">주택상가</option>
+        <option value="기타">기타</option>
+      </select>
+    </label>
+    <label>면적(평):
+      <input type="number" id="area" />
+    </label>
+    <label>보증금(만원):
+      <input type="number" id="deposit" />
+    </label>
+    <label>월세(만원):
+      <input type="number" id="rent" />
+    </label>
+    <label>원생 수:
+      <input type="number" id="students" />
+    </label>
+    <label>월 매출액(만원):
+      <input type="number" id="sales" />
+    </label>
+    <label>월 순수익(만원):
+      <input type="number" id="profit" />
+    </label>
+    <label>시설 상태:
+      <select id="facility">
+        <option value="1.0">상</option>
+        <option value="0.95">중</option>
+        <option value="0.75">하</option>
+      </select>
+    </label>
+    <label>차량 운행 여부:
+      <select id="car">
+        <option value="1.0">없음</option>
+        <option value="0.7">운행함</option>
+      </select>
+    </label>
+    <label>원장님 수업 여부:
+      <select id="owner">
+        <option value="0">수업 있음</option>
+        <option value="1">수업 없음</option>
+      </select>
+    </label>
+    <div class="checkbox-line">
+      <label for="urgent">급매:</label>
+      <input type="checkbox" id="urgent" />
+      <span>(급매만 클릭하세요)</span>
+    </div>
+
+    <button onclick="calculate()">예상 권리금 시세 계산</button>
+    <div class="result" id="result"></div>
+    <div class="notice">※ 본 계산기는 표준 시세 예측 기준이며 실제 권리금과 다를 수 있습니다.<br>
+      정확한 상담은 원아카데미 <strong style="font-size: 1.2em;">010-8966-7792</strong>로 문의주세요.</div>
+  </div>
+
+  <script>
+    function calculate() {
+      const requiredFields = [
+        'region', 'type', 'building', 'area', 'deposit', 'rent', 'students', 'sales', 'profit', 'facility', 'car', 'owner'
+      ];
+
+      for (let id of requiredFields) {
+        const el = document.getElementById(id);
+        if (!el || (el.tagName === 'SELECT' && el.value === '') || (el.tagName === 'INPUT' && !el.value)) {
+          document.getElementById('result').innerText = '모든 항목을 입력하세요.';
+          return;
+        }
+      }
+      const sales = Number(document.getElementById('sales').value);
+      const profit = Number(document.getElementById('profit').value);
+      const facility = Number(document.getElementById('facility').value);
+      const car = Number(document.getElementById('car').value);
+      const urgent = document.getElementById('urgent').checked;
+      const owner = Number(document.getElementById('owner').value);
+      const building = document.getElementById('building').value;
+
+      if (!profit || profit < 0) {
+        document.getElementById('result').innerText = '예상 권리금 시세: 약 0만원 예상됩니다.';
+        return;
+      }
+
+      if (sales < profit) {
+        document.getElementById('result').innerText = '월매출액은 월순수익보다 낮을 수 없습니다';
+        return;
+      }
+
+      let base = profit * 10;
+      let adjusted = base * car;
+
+      // 시설 보정값 분기
+      if (document.getElementById('facility').value === '0.75') {
+        if (base <= 2000) {
+          adjusted *= 0.7; // 30% 감가
+        } else if (base <= 4000) {
+          adjusted *= 0.75; // 25% 감가
+        } else {
+          adjusted *= 0.8; // 20% 감가
+        }
+      } else {
+        adjusted *= facility; // 상, 중은 그대로 적용
+      }
+
+      if (owner === 1) adjusted += 300;
+
+      if (building === "아파트상가") {
+        adjusted *= 1.02;
+      } else if (building === "주택상가") {
+        adjusted *= 0.95;
+      }
+
+      if (urgent) adjusted *= 0.6;
+
+      let minEstimate, maxEstimate;
+      if (profit <= 100) {
+        minEstimate = 0;
+        maxEstimate = Math.round(adjusted * 1.03 / 100) * 100;
+      } else {
+        minEstimate = Math.round(adjusted * 0.93 / 100) * 100;
+        maxEstimate = Math.round(adjusted * 1.03 / 100) * 100;
+      }
+
+      document.getElementById('result').innerText = `예상 권리금 시세: 약 ${minEstimate.toLocaleString()}만원 ~ ${maxEstimate.toLocaleString()}만원 예상됩니다.`;
+    }
+  </script>
+<div style="margin-top: 30px;">
+  <a href="https://oneacademy.co.kr" target="_blank" style="text-decoration:none;">
+    <button style="background-color:#28a745; font-size:1.1em; padding:12px 24px; border:none; border-radius:6px; color:white; cursor:pointer;">
+      원아카데미 들어가기
+    </button>
+  </a>
+</div>
+</body>
+</html>
