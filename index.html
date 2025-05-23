@@ -93,9 +93,8 @@
       <input type="number" id="sales" />
     </label>
     <label style="margin-bottom: 4px;">월 지출비용(만원):</label>
-<span style="font-size: 0.9em; color: #666; margin-top: -6px; display: block;">(월세 제외 : 강사비+관리비+공과금(전기,수도)+기타경비 등)</span>
-<input type="number" id="expenses" />
-    </label>
+    <span style="font-size: 0.9em; color: #666; margin-top: -6px; display: block;">(월세 제외 : 강사비+관리비+공과금(전기,수도)+기타경비 등)</span>
+    <input type="number" id="expenses" />
     <label>월 순수익(만원):
       <input type="number" id="profit" readonly />
     </label>
@@ -120,8 +119,8 @@
     </label>
     <label>추가 시설비(만원):
       <span style="font-size: 0.9em; color: #666;">(시설매매 시 입력하세요. 차량, 신설 등)</span>
-      <input type="number" id="extraFee" />
-      <div class="checkbox-line"><input type="checkbox" id="noExtraFee" checked /> <label for="noExtraFee">없음</label></div>
+      <input type="number" id="extraFee" style="margin-bottom: 5px;" />
+<div class="checkbox-line" style="margin-top: 0;"><input type="checkbox" id="noExtraFee" checked /> <label for="noExtraFee">없음</label></div>
     </label>
     <div class="checkbox-line">
       <label for="urgent">급매:</label>
@@ -163,35 +162,40 @@
     }
 
     function calculate() {
-  const profit = parseFloat(document.getElementById('profit').value) || 0;
-  const facility = parseFloat(document.getElementById('facility').value);
-  const car = parseFloat(document.getElementById('car').value);
-  const owner = parseFloat(document.getElementById('owner').value);
-  const urgent = document.getElementById('urgent').checked;
-  const type = document.getElementById('type').value;
-  const building = document.getElementById('building').value;
-  const extraFee = parseFloat(document.getElementById('extraFee').value) || 0;
-  const noExtra = document.getElementById('noExtraFee').checked;
+      const profit = parseFloat(document.getElementById('profit').value) || 0;
+      const facility = parseFloat(document.getElementById('facility').value);
+      const car = parseFloat(document.getElementById('car').value);
+      const owner = parseFloat(document.getElementById('owner').value);
+      const urgent = document.getElementById('urgent').checked;
+      const type = document.getElementById('type').value;
+      const building = document.getElementById('building').value;
+      const extraFee = parseFloat(document.getElementById('extraFee').value) || 0;
+      const noExtra = document.getElementById('noExtraFee').checked;
 
-  if (!profit || profit < 0) {
-    document.getElementById('result').innerText = '예상 권리금 시세: 약 0만원 예상됩니다.';
-    return;
-  }
+      let base = 0;
 
-  let base = profit * 10;
-  base *= facility;
-  base *= car;
-  base *= type === '피아노-교습소' ? 0.95 : 1.0;
-  base *= building === '아파트상가' ? 1.02 : building === '주택상가' ? 0.95 : 1.0;
-  if (owner === 1) base *= 1.2;
-  if (urgent) base *= 0.6;
-  if (!noExtra) base += extraFee;
+      if (profit > 0) {
+        base = profit * 10;
+        base *= facility;
+        base *= car;
+        base *= type === '피아노-교습소' ? 0.95 : 1.0;
+        base *= building === '아파트상가' ? 1.02 : building === '주택상가' ? 0.95 : 1.0;
+        if (owner === 1) base *= 1.2;
+        if (urgent) base *= 0.6;
+      }
 
-  const min = Math.round(base * 0.93 / 100) * 100;
-  const max = Math.round(base * 1.03 / 100) * 100;
+      if (!noExtra) base += extraFee;
 
-  document.getElementById('result').innerText = `예상 권리금 시세: 약 ${min.toLocaleString()}만원 ~ ${max.toLocaleString()}만원 예상됩니다.`;
-}
+      if (base === 0) {
+        document.getElementById('result').innerText = '예상 권리금 시세: 약 0만원 예상됩니다.';
+        return;
+      }
+
+      const min = Math.round(base * 0.93 / 100) * 100;
+      const max = Math.round(base * 1.03 / 100) * 100;
+
+      document.getElementById('result').innerText = `예상 권리금 시세: 약 ${min.toLocaleString()}만원 ~ ${max.toLocaleString()}만원 예상됩니다.`;
+    }
   </script>
 </body>
 </html>
